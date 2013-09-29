@@ -1,10 +1,12 @@
-debathena-reactivate (2.0.44) UNRELEASED; urgency=low
+debathena-reactivate (2.0.44) unstable; urgency=low
 
   * Remove old c-p-d undivert code, it's no longer needed
   * Stop processing schroot.conf in the preinst
   * Don't forget the divert-extension for hidden files
+  * Add git-buildpackage configuration
+  * Set source format to 3.0 (native)
 
- -- Alexander Chernyakhovsky <achernya@mit.edu>  Thu, 30 May 2013 03:20:55 -0400
+ -- Alexander Chernyakhovsky <achernya@mit.edu>  Sun, 29 Sep 2013 05:54:30 -0400
 
 debathena-reactivate (2.0.43) unstable; urgency=low
 
