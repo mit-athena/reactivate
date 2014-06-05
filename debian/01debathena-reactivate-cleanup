@@ -7,15 +7,6 @@
 # Set the volume to zero for all sound cards, and save that state.
 invoke-rc.d debathena-reactivate start
 
-# Clean up CUPS' cache before starting CUPS back up
-rm -f /var/cache/cups/remote.cache
-
-# Restart necessary daemons outside the chroot
-daemons=$(/usr/sbin/policy-rc.d --daemons)
-for daemon in $daemons; do
-    invoke-rc.d "$daemon" start || [ $? = 100 ]
-done
-
 /usr/lib/debathena-reactivate/reactivate
 
 rm /var/run/athena-login

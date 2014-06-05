@@ -3,10 +3,4 @@
 # This script is also sourced as root at the end of a lightdm login
 # session
 
-# Stop daemons that need to be restarted inside the chroot
-daemons=$(/usr/sbin/policy-rc.d --daemons)
-for daemon in $daemons; do
-    invoke-rc.d "$daemon" stop || [ $? = 100 ]
-done
-
 touch /var/run/athena-login

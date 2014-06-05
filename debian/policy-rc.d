@@ -1,8 +1,7 @@
 #!/bin/sh
 
 if [ "--daemons" = "$1" ]; then
-    [ -e /etc/init.d/cups ] && rcname=cups || rcname=cupsys
-    echo $rcname
+    logger -p user.notice -t reactivate "policy-rc.d called by legacy code"
     exit
 fi
 
@@ -12,25 +11,8 @@ case "$2" in
         ;;
 esac
 
-# If nobody's logged in, follow the default policy
-if ! [ -e /var/run/athena-login ]; then
-    exit 0
-elif [ -e /ClusterLogin ]; then
-    case "$1" in
-        cups|cupsys)
-            exit 0
-            ;;
-        *)
-            exit 101
-            ;;
-    esac
-else
-    case "$1" in
-        cups|cupsys)
-            exit 101
-            ;;
-        *)
-            exit 0
-            ;;
-    esac
+if ! [ -e /ClusterLogin ]; then
+    logger -p user.notice -t reactivate "policy-rc.d in effect when /ClusterLogin not present!!"
 fi
+
+exit 101

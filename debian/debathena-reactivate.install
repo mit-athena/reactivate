@@ -5,7 +5,7 @@ debian/01debathena-reactivate-cleanup usr/share/debathena-gdm-config/PostSession
 debian/99debathena-reactivate-setup usr/share/debathena-lightdm-config/session-setup.d
 debian/01debathena-reactivate-cleanup usr/share/debathena-lightdm-config/session-cleanup.d
 debian/updatedb.findutils.cron.local etc
-debian/policy-rc.d usr/sbin
+debian/policy-rc.d usr/share/debathena-reactivate
 debian/sudo-warning etc/athena
 debian/su-warning etc/athena
 debian/login etc/schroot/chroot.d

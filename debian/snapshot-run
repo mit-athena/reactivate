@@ -8,6 +8,12 @@
 # around their Xsession or shell. You probably want to run reactivate
 # immediately afterwards, as root.
 
+errormsg="Sorry, an internal error occurred while initializing your
+Athena login session.  You will be returned to the login screen.
+
+You may reboot the workstation and try again.  If the error persists,
+please contact hotline@mit.edu and ask them to reinstall this workstation."
+
 if [ -e /var/run/debathena-inhibit-dbus-helper ]; then
     logger -p user.notice -t reactivate "debathena-inhibit-dbus-helper still exists in snapshot-run (shouldn't happen)"
     rm /var/run/debathena-inhibit-dbus-helper
@@ -17,7 +23,6 @@ set -e
 cd /
 
 addgroups="sudo admin lpadmin adm fuse cdrom floppy audio video plugdev scanner dialout lp"
-daemons="$(/usr/sbin/policy-rc.d --daemons)"
 
 # Setup
 
@@ -25,17 +30,21 @@ session=$(schroot -c login -b)
 cleanup() {
     # Teardown
 
+    if [ "$1" = "err" ]; then
+	if hash zenity > /dev/null 2>&1; then
+	    zenity --error --no-wrap --text="$errormsg"
+	else
+	    logger -p user.notice -t reactivate "Fatal error when setting up snapshot; can't inform user"
+	fi
+    fi
+
     # Remove file from above.
     # (This also gets nuked in reactivate, but be paranoid)
     rm -f /tmp/ticketenv
 
-    for daemon in $daemons; do
-	schr invoke-rc.d "$daemon" stop || [ $? = 100 ]
-    done
-
     schroot -c "$session" -e
 }
-trap 'cleanup' EXIT
+trap 'cleanup err' EXIT
 sch() { schroot -r -c "$session" -- "$@"; }          # Run in the chroot
 schq() { schroot -q -r -c "$session" -- "$@"; }      # Run in the chroot quietly
 schr() { schroot -r -c "$session" -u root -- "$@"; } # Run in the chroot as root
@@ -46,9 +55,7 @@ done
 
 schr touch /ClusterLogin
 
-for daemon in $daemons; do
-    schr invoke-rc.d "$daemon" start || [ $? = 100 ]
-done
+schr install -m 0755 /usr/share/debathena-reactivate/policy-rc.d /usr/sbin/policy-rc.d
 
 schr rm /etc/debian_chroot
 
@@ -71,6 +78,7 @@ echo "KRB5CCNAME=$KRB5CCNAME" >| /tmp/ticketenv
 
 set +e
 
+trap 'cleanup' EXIT
 cd
 schroot -c "$session" -r -p -- /usr/lib/debathena-reactivate/session-wrapper "$@"
 cd /
