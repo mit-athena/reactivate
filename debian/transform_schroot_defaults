@@ -1,2 +1,2 @@
 #!/usr/bin/perl -0p
-s/^SESSIONS_RECOVER="recover"$/SESSIONS_RECOVER="end"/m;
+s/^SESSIONS_RECOVER="recover"$/SESSIONS_RECOVER="end"/m or s/^START_ACTION="recover"$/START_ACTION="end"/m or die "Transformation failed; upstream file changed?";

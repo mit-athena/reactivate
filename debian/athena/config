@@ -1,0 +1,2 @@
+# This could be used to execute arbitrary shell code at chroot setup
+# time, but we're not using it.

@@ -1,8 +1,4 @@
-FSTAB="/etc/schroot/mount-athena"
+# This file is deprecated and only used by schroot 1.4 and earlier
+FSTAB="/etc/schroot/athena/fstab"
 COPYFILES=""
 NSSDATABASES=""
-
-rm -f "${FSTAB}"
-sed -e "s|_VARRUN_|$(readlink -f /var/run)|g" \
-       -e "s|_VARLOCK_|$(readlink -f /var/lock)|g" \
-       -e "s|_DEVSHM_|$(readlink -f /dev/shm)|g" < "${FSTAB}.in" > "${FSTAB}"

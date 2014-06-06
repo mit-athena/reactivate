@@ -5,10 +5,16 @@ set -e
 . "$SETUP_DATA_DIR/common-data"
 . "$SETUP_DATA_DIR/common-functions"
 
-if [ -f "$CHROOT_SCRIPT_CONFIG" ]; then
+# schroot 1.6 deprecates script-config.  Once we stop building
+# for precise, we can drop this entire conditional block and simply
+# source $SETUP_DATA_DIR/common-config
+if [ -f "$SETUP_DATA_DIR/common-config" ]; then
+    . "$SETUP_DATA_DIR/common-config"
+elif [ -n  "$CHROOT_SCRIPT_CONFIG" ] && \
+    [ -f "$CHROOT_SCRIPT_CONFIG" ]; then
     . "$CHROOT_SCRIPT_CONFIG"
 elif [ "$STATUS" = "ok" ]; then
-    fatal "script-config file '$CHROOT_SCRIPT_CONFIG' does not exist"
+    fatal "Debathena has no idea how to deal with this schroot configuration."
 fi
 
 if [ $STAGE = "setup-start" ]; then

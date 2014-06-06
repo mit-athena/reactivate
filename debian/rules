@@ -1,7 +1,17 @@
 #!/usr/bin/make -f
 
+SCHROOT_VERSION = $(shell dpkg-query --showformat='$${Version}' --show schroot)
+SCHROOT_16 = $(shell dpkg --compare-versions $(SCHROOT_VERSION) ge '1.6.4-1~' && echo y)
+
 %:
 	dh $@ --with config-package
 
 override_dh_fixperms:
 	dh_fixperms -X/usr/lib/debathena-reactivate/session-wrapper
+
+override_dh_install:
+	dh_install
+ifneq ($(SCHROOT_16),y)
+# Remember to prefix $ with $, because make hates you.
+	sed -i -e 's/^profile=athena$$/script-config=script-athena/' debian/debathena-reactivate/etc/schroot/chroot.d/login
+endif

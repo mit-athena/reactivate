@@ -3,7 +3,7 @@ type=directory
 # There's got to be a better way
 groups=nss-local-users,nss-nonlocal-users
 root-groups=nss-local-users,nss-nonlocal-users
-script-config=script-athena
+profile=athena
 directory=/
 union-type=aufs
 # Don't filter out any environment variables

@@ -31,10 +31,22 @@ set -e
 . "$SETUP_DATA_DIR/common-data"
 . "$SETUP_DATA_DIR/common-functions"
 
-if [ -f "$CHROOT_SCRIPT_CONFIG" ]; then
+# schroot 1.6 deprecates script-config.  Once we stop building
+# for precise, we can drop this entire conditional block and simply
+# source $SETUP_DATA_DIR/common-config
+
+# Also, schroot 1.6 replaces CHROOT_MOUNT_LOCATION with CHROOT_PATH in
+# its 15killprocs.  They both still work, but we should update anyway.
+KILLPATH="$CHROOT_MOUNT_LOCATION"
+
+if [ -f "$SETUP_DATA_DIR/common-config" ]; then
+    . "$SETUP_DATA_DIR/common-config"
+    KILLPATH="$CHROOT_PATH"
+elif [ -n  "$CHROOT_SCRIPT_CONFIG" ] && \
+    [ -f "$CHROOT_SCRIPT_CONFIG" ]; then
     . "$CHROOT_SCRIPT_CONFIG"
 elif [ "$STATUS" = "ok" ]; then
-    fatal "script-config file '$CHROOT_SCRIPT_CONFIG' does not exist"
+    fatal "Debathena has no idea how to deal with this schroot configuration."
 fi
 
 # Wrapper around kill command. Turns errors into
@@ -98,5 +110,5 @@ do_kill_all()
 }
 
 if [ $STAGE = "setup-recover" ] || [ $STAGE = "setup-stop" ]; then
-    do_kill_all "$CHROOT_MOUNT_LOCATION"
+    do_kill_all "$KILLPATH"
 fi
