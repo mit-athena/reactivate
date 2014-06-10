@@ -1,3 +1,11 @@
+debathena-reactivate (2.0.46) unstable; urgency=low
+
+  * Tweak schroot configuration to support both schroot 1.4 and 1.6
+  * Drop the schroot fstab conditional code to deal with /var/run -> /run
+    migration, because we don't support old distros anymore
+
+ -- Jonathan Reed <jdreed@mit.edu>  Tue, 10 Jun 2014 15:22:20 -0400
+
 debathena-reactivate (2.0.45) unstable; urgency=low
 
   * Stop installing policy-rc.d in /usr/sbin (Trac: #1478), instead put it
