@@ -4,8 +4,11 @@ debathena-reactivate (2.0.47) UNRELEASED; urgency=low
     (Ending stale chroots will cause the file to stick around)
     (Trac: #1497)
   * bind-mount /sys with rbind (Trac: #1499)
+  * Add a setup.d script (11umount-afs) to lazily unmount /afs inside the
+    chroot, because gvfs keeps something open that causes the regular
+    umount to return EBUSY. (Trac: #1500)
 
- -- Jonathan Reed <jdreed@mit.edu>  Mon, 23 Jun 2014 16:43:35 -0400
+ -- Jonathan Reed <jdreed@mit.edu>  Mon, 23 Jun 2014 16:56:11 -0400
 
 debathena-reactivate (2.0.46) unstable; urgency=low
 

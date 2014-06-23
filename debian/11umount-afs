@@ -1,0 +1,28 @@
+#!/bin/sh
+
+set -e
+
+. "$SETUP_DATA_DIR/common-data"
+. "$SETUP_DATA_DIR/common-functions"
+
+# schroot 1.6 deprecates script-config.  Once we stop building
+# for precise, we can drop this entire conditional block and simply
+# source $SETUP_DATA_DIR/common-config
+if [ -f "$SETUP_DATA_DIR/common-config" ]; then
+    . "$SETUP_DATA_DIR/common-config"
+elif [ -n  "$CHROOT_SCRIPT_CONFIG" ] && \
+    [ -f "$CHROOT_SCRIPT_CONFIG" ]; then
+    . "$CHROOT_SCRIPT_CONFIG"
+elif [ "$STATUS" = "ok" ]; then
+    fatal "Debathena has no idea how to deal with this schroot configuration."
+fi
+
+if [ $STAGE = "setup-stop" ]; then
+    # We're un-bind-mounting /afs with -l, we don't need the
+    # flock(1) code from 10mount
+    if [ -e "${CHROOT_MOUNT_LOCATION}/afs" ]; then
+	info "Attempting lazy unmount of ${CHROOT_MOUNT_LOCATION}/afs"
+	umount -l "${CHROOT_MOUNT_LOCATION}/afs" || \
+	    warn "Couldn't umount /afs in chroot."
+    fi
+fi
