@@ -20,6 +20,10 @@ fi
 if [ $STAGE = "setup-start" ]; then
     info "Adding messagebus to access list for session ${SESSION_ID}"
     sed -i "/^root-users/s/$/,messagebus/" /var/lib/schroot/session/"${SESSION_ID}"
+    if [ -e /var/run/debathena-inhibit-dbus-helper ]; then
+	info "Removing stale dbus inhibit file"
+	rm /var/run/debathena-inhibit-dbus-helper
+    fi
 fi
 
 if [ $STAGE = "setup-stop" ]; then

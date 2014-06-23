@@ -1,3 +1,12 @@
+debathena-reactivate (2.0.47) UNRELEASED; urgency=low
+
+  * Ensure the dbus-inhibitor file is gone when the chroot starts up.
+    (Ending stale chroots will cause the file to stick around)
+    (Trac: #1497)
+  * bind-mount /sys with rbind (Trac: #1499)
+
+ -- Jonathan Reed <jdreed@mit.edu>  Mon, 23 Jun 2014 16:43:35 -0400
+
 debathena-reactivate (2.0.46) unstable; urgency=low
 
   * Tweak schroot configuration to support both schroot 1.4 and 1.6
