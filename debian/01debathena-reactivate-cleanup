@@ -4,9 +4,27 @@
 # This script is also sourced as root at the end of a lightdm login
 # session
 
-# Set the volume to zero for all sound cards, and save that state.
-invoke-rc.d debathena-reactivate start
+do_reactivate() {
+    # Set the volume to zero for all sound cards, and save that state.
+    invoke-rc.d debathena-reactivate start
 
-/usr/lib/debathena-reactivate/reactivate
+    /usr/lib/debathena-reactivate/reactivate
 
-rm /var/run/athena-login
+    rm /var/run/athena-login
+}
+
+HELPER=/usr/lib/debathena-reactivate/reactivate-helper
+
+if ! $HELPER supported; then
+    # We can't check; just assume we should (legacy behavior)
+    do_reactivate
+else
+    if $HELPER should-reactivate; then
+	# We should reactivate, so do it
+	do_reactivate
+    elif [ $? -ne 1 ]; then
+	# An error occurred while determining if we should reactivate
+	# Fail-safe and reactivate anyway (at risk of the user losing data)
+	do_reactivate
+    fi
+fi

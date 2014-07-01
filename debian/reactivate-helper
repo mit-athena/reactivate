@@ -1,0 +1,138 @@
+#!/usr/bin/python
+#
+# Query logind to decide whether or not reactivation is needed.
+# Returns 0 or 1 to indicate true or false answers to
+# its invocation.  Returns 127 if the world exploded.
+
+import os
+import sys
+import time
+
+from collections import defaultdict
+
+import dbus
+from dbus.exceptions import DBusException
+
+LD_NAME = 'org.freedesktop.login1'
+LD_MANAGER_PATH = '/org/freedesktop/login1'
+LD_MANAGER_IFACE = 'org.freedesktop.login1.Manager'
+LD_SESSION_IFACE = 'org.freedesktop.login1.Session'
+
+SERVICE_UNKNOWN = 'org.freedesktop.DBus.Error.ServiceUnknown'
+
+def get_sessions():
+    bus = dbus.SystemBus()
+    manager = dbus.Interface(bus.get_object(LD_NAME, LD_MANAGER_PATH),
+                             LD_MANAGER_IFACE)
+    target_sessions = defaultdict(list)
+    # Get all active sessions
+    sessions = manager.ListSessions()
+    for s in sessions:
+        # Each session is a dbus.Struct (tuple) of:
+        # (session id, uid, username, seat id, and session object path)
+        session = dbus.Interface(bus.get_object(LD_NAME, s[-1]),
+                                 LD_SESSION_IFACE)
+        obj_properties = dbus.Interface(session,
+                                        'org.freedesktop.DBus.Properties')
+        properties = obj_properties.GetAll(LD_SESSION_IFACE)
+        target_sessions[properties['Class'].lower()].append(properties)
+    return target_sessions
+
+def log_sessions(sessions):
+    with open("/var/log/reactivate-helper.log", "a") as f:
+        f.write("------ Log begins: {0} -----\n".format(time.ctime()))
+        for s_type in sessions:
+            for s in sessions[s_type]:
+                for k,v in s.items():
+                    f.write("   {0} = {1}\n".format(k,v))
+                f.write("----\n")
+        f.write("------ Log ends -----\n")
+
+def should_reactivate(args=None):
+    """Determine if we should reactivate or not.
+
+    Part of this is a workaround for LP #1249515, in which
+    session-cleanup now gets called when authentication is cancelled,
+    but part of it is to not reboot out from under the user when they
+    manage to activate user-switching and attempt to reconnect to
+    their session.
+    """
+    sessions = get_sessions()
+    # If there are multiple of either kind, we have no idea how to deal
+    # The calling code can decide how to handle errors
+    if len(sessions['greeter']) > 1:
+        log_sessions(sessions)
+        raise ValueError("Too many greeter sessions")
+    if len(sessions['user']) > 1:
+        log_sessions(sessions)
+        raise ValueError("Too many user sessions")
+    if len(sessions['greeter']) == 0 and \
+            len(sessions['user']) == 0:
+        # If there are no greeter sessions, and no
+        # user sessions, reactivate
+        return True
+    if len(sessions['greeter']) > 0 and \
+            len(sessions['user']) == 0:
+        # If there is a greeter session and no user session...
+        if sessions['greeter'][0]['State'] == 'active':
+            # The user hit 'Cancel', probably
+            return False
+        elif sessions['greeter'][0]['State'] == 'online':
+            # We just came back to a second greeter from an ending
+            # login session, and should reactivate
+            return True
+    if len(sessions['greeter']) > 0 and \
+            len(sessions['user']) > 0:
+        # If there are both sessions
+        if sessions['user'][0]['State'] == 'closing':
+            # If the user session is closing, the user managed to pick
+            # "Shutdown" from the second greeter's login screen.
+            # do _not_ reactivate, since we'll likely end up with stray
+            # processes.
+            return False
+        if sessions['greeter'][0]['State'] == 'active' and \
+                sessions['user'][0]['State'] == 'online':
+            # The user hit 'Cancel' at a second greeter
+            return False
+        if sessions['greeter'][0]['State'] == 'closing' and \
+                sessions['user'][0]['State'] == 'active':
+            # The user spawned a second greeter, switched back to
+            # their original VT, unlocked it, then switched to the
+            # second greeter's VT, and attempted to unlock the screen
+            # from the greeter.  (WHY??!)
+            return False
+    if len(sessions['user']) > 0 and \
+            len(sessions['greeter']) == 0:
+        # A user session is active
+        if sessions['user'][0]['State'] == 'active':
+            # If there's a single active user session, we just re-authenticated
+            # to a previously locked session, so do not reactivate
+            return False
+    log_sessions(sessions)
+    raise ValueError("No idea how to handle this situation")
+
+def supported(args=None):
+    try:
+        _ = dbus.SystemBus().get_object(LD_NAME, LD_MANAGER_PATH)
+        return True
+    except DBusException as e:
+        if e.get_dbus_name() != SERVICE_UNKNOWN:
+            raise e
+        return False
+
+if __name__ == "__main__":
+    dispatch = { 'supported': supported,
+                 'should-reactivate': should_reactivate }
+    if len(sys.argv) < 2 or sys.argv[1] not in dispatch:
+        print >>sys.stderr, "Usage: {progname} {cmds}".format(
+            progname=os.path.basename(sys.argv[0]),
+            cmds='|'.join(dispatch.keys()))
+        sys.exit(127)
+    try:
+        if dispatch[sys.argv[1]](sys.argv[2:]):
+            sys.exit(0)
+        else:
+            sys.exit(1)
+    except Exception as e:
+        print >>sys.stderr, "Unexpected Exception:", e
+        sys.exit(127)

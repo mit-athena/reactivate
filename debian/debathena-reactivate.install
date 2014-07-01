@@ -20,3 +20,4 @@ debian/11umount-afs etc/schroot/setup.d
 debian/dbus-daemon-launch-helper-blacklist usr/share/debathena-reactivate
 debian/debathena-reactivate-sudoers etc/sudoers.d
 command-not-found.mo usr/share/locale/en/LC_MESSAGES
+debian/reactivate-helper usr/lib/debathena-reactivate

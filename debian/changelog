@@ -1,5 +1,8 @@
 debathena-reactivate (2.0.47) UNRELEASED; urgency=low
 
+  * Add new reactivate-helper script to query logind and decide whether or
+    not to reactivate.  In particular, this prevents spontaneous reboots
+    when user-switching is enabled.
   * Ensure the dbus-inhibitor file is gone when the chroot starts up.
     (Ending stale chroots will cause the file to stick around)
     (Trac: #1497)
@@ -8,7 +11,7 @@ debathena-reactivate (2.0.47) UNRELEASED; urgency=low
     chroot, because gvfs keeps something open that causes the regular
     umount to return EBUSY. (Trac: #1500)
 
- -- Jonathan Reed <jdreed@mit.edu>  Mon, 23 Jun 2014 16:56:11 -0400
+ -- Jonathan Reed <jdreed@mit.edu>  Wed, 02 Jul 2014 13:07:57 -0400
 
 debathena-reactivate (2.0.46) unstable; urgency=low
 
