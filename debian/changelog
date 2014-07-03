@@ -1,4 +1,4 @@
-debathena-reactivate (2.0.47) UNRELEASED; urgency=low
+debathena-reactivate (2.0.47) unstable; urgency=low
 
   * Add new reactivate-helper script to query logind and decide whether or
     not to reactivate.  In particular, this prevents spontaneous reboots
