@@ -15,11 +15,13 @@ do_reactivate() {
 
 HELPER=/usr/lib/debathena-reactivate/reactivate-helper
 
-if ! $HELPER supported; then
+if ! [ -x "$HELPER" ]; then
+   logger -t reactivate -p daemon.warning "$HELPER does not exist!"
+elif ! "$HELPER" supported; then
     # We can't check; just assume we should (legacy behavior)
     do_reactivate
 else
-    if $HELPER should-reactivate; then
+    if "$HELPER" should-reactivate; then
 	# We should reactivate, so do it
 	do_reactivate
     elif [ $? -ne 1 ]; then
