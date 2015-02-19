@@ -57,6 +57,12 @@ case "$1" in
 	    /usr/share/update-notifier/notify-reboot-required
 	fi
 
+        # Kill apport
+        if hash invoke-rc.d; then
+            invoke-rc.d apport stop
+        else
+            /etc/init.d/apport stop
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

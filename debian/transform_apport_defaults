@@ -1,0 +1,2 @@
+#!/usr/bin/perl -0p
+s/^enabled=1$/enabled=0/mi or die "Transformation failed; upstream file changed?";
