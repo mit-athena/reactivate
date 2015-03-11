@@ -1,3 +1,10 @@
+debathena-reactivate (2.0.48.2) unstable; urgency=low
+
+  * Re-enable trusty to push the broken 2.0.48 source package out
+    of the repo
+
+ -- Benjamin Kaduk <kaduk@mit.edu>  Wed, 11 Mar 2015 12:08:41 -0500
+
 debathena-reactivate (2.0.48.1) unstable; urgency=low
 
   * Build-dep on apport
