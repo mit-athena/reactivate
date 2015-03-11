@@ -21,7 +21,7 @@ Depends: schroot (>= 1.4.25~),
  ${shlibs:Depends}
 Provides: ${diverted-files}
 Conflicts: ${diverted-files}
-X-Debathena-Build-For: precise trusty
+X-Debathena-Build-For: trusty
 Description: Causes gdm logins to run in an ephemeral snapshot of the root
  This package causes each gdm login to run in a temporary copy of the
  root, so that any system modifications performed within the chroot
